@@ -286,44 +286,46 @@ function addCarousel(loc_id, filePath, component, carouselId, imagesId){
 
           data = $.parseJSON(data);
 
-          for(var i = 0; i < data.length; i++) {
-            if( i == 0){
-              carousel_indicator += '<li data-target="#'+ carouselId +'" data-slide-to="'+ i +'" class="active"></li>';
-              inner_carousel += '<div class="carousel-item active">'+
-                      '<img class="d-block img-fluid" src="'+ imagesFilePath + data[i] +'" width="100%"></div>';
-
-            }else{
-              carousel_indicator += '<li data-target="#'+ carouselId +'" data-slide-to="'+ i +'"></li>';
-              inner_carousel += '<div class="carousel-item">'+
+          if(data.length != 0) {
+            for(var i = 0; i < data.length; i++) {
+              if( i == 0){
+                carousel_indicator += '<li data-target="#'+ carouselId +'" data-slide-to="'+ i +'" class="active"></li>';
+                inner_carousel += '<div class="carousel-item active">'+
                         '<img class="d-block img-fluid" src="'+ imagesFilePath + data[i] +'" width="100%"></div>';
-            }
-          } // End for loop
 
-          // Add closing tags
-          carousel_indicator  += '</ul>';
-          inner_carousel      += '</div>';
-          carouselContent     += '<div id="'+ imagesId +'" class="carousel slide" data-ride="carousel">';
-          carouselContent     += carousel_indicator;
-          carouselContent     += inner_carousel;
+              }else{
+                carousel_indicator += '<li data-target="#'+ carouselId +'" data-slide-to="'+ i +'"></li>';
+                inner_carousel += '<div class="carousel-item">'+
+                          '<img class="d-block img-fluid" src="'+ imagesFilePath + data[i] +'" width="100%"></div>';
+              }
+            } // End for loop
 
-        // Adding NEXT and PREVIOUS button to the carousel images  
-        carouselContent += '<a class="carousel-control-prev" href="#'+ imagesId +'" role="button" data-slide="prev">' +
-                '<span class="carousel-control-prev-icon" aria-hidden="true" style="background-color: black;"></span><span class="sr-only">Previous</span></a>' +
+            // Add closing tags
+            carousel_indicator  += '</ul>';
+            inner_carousel      += '</div>';
+            carouselContent     += '<div id="'+ imagesId +'" class="carousel slide" data-ride="carousel">';
+            carouselContent     += carousel_indicator;
+            carouselContent     += inner_carousel;
+
+
+            // Adding NEXT and PREVIOUS button to the carousel images  
+            carouselContent += '<a class="carousel-control-prev" href="#'+ imagesId +'" role="button" data-slide="prev">' +
+                    '<span class="carousel-control-prev-icon" aria-hidden="true" style="background-color: black;"></span><span class="sr-only">Previous</span></a>' +
                 '<a class="carousel-control-next" href="#'+ imagesId +'" role="button" data-slide="next">' +
                 '<span class="carousel-control-next-icon" aria-hidden="true" style="background-color: black;"></span><span class="sr-only">Next</span>' +
                 '</a></div>';
 
-        // Embed the created carousel of images inside the website
-        document.getElementById(component).innerHTML = carouselContent;
-       }
+            // Embed the created carousel of images inside the website
+            document.getElementById(component).innerHTML = carouselContent;
+          }
+          else {
+            document.getElementById(component).innerHTML = '<center><img class="d-block img-fluid" src="files/err/no_data.png" width="100%" style="margin-top: 15px;"></center>';
+          }
+       } 
     });
 
-    // Display default image if images in the location is not found
-    if( carouselContent == ''){
-      document.getElementById(component).innerHTML = '<img class="d-block img-fluid" src="carousel.png" onerror="onError(this)" width="100%" />';
-    }
-
 } /* End addCarousel function */
+
 
 /*
  * Viewing additional NIPAS information
