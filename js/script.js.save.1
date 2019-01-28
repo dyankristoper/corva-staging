@@ -1,0 +1,1572 @@
+/* JQuery */
+
+/* 
+ *  Prevent default action upon submit
+ *  This will prevent the page from reloading
+ */
+
+//Kuya Jo var instantiations
+ var myData;
+ var MyYears;
+ var Index=0;
+ var ManLocId;
+ var mtype;
+ 
+$("#filterNipas").submit(function(e) {
+    e.preventDefault();
+});
+
+/*
+ *  Variables decoded from JSON files
+ */
+
+/* NIPAS data viewed as markers in the map */
+var nipasMarkers = (function(){
+  var nipasMarkers = null;
+  $.ajax({
+    url: 'nipas-results.json',
+    async: false,
+    dataType: 'json',
+    success: function(response){
+      nipasMarkers = response;
+    }
+  });
+  return nipasMarkers;
+})();
+
+/* Fish data, graphed as stacked chart */
+
+var fishDataSP = (function(){
+  var fishDataSP = null;
+  $.ajax({
+    url: 'fish-sp.json',
+    async: false,
+    dataType: 'json',
+    success: function(response){
+      fishDataSP = response;
+    }
+  });
+  return fishDataSP;
+})();
+
+var fishDataDEN = (function(){
+  var fishDataDEN = null;
+  $.ajax({
+    url: 'fish-den.json',
+    async: false,
+    dataType: 'json',
+    success: function(response){
+      fishDataDEN = response;
+    }
+  });
+  return fishDataDEN;
+})();
+
+var fishDataBIO = (function(){
+  var fishDataBIO = null;
+  $.ajax({
+    url: 'fish-bio.json',
+    async: false,
+    dataType: 'json',
+    success: function(response){
+      fishDataBIO = response;
+    }
+  });
+  return fishDataBIO;
+})();
+
+/* End fish data*/
+
+/* Shallow reef data */
+var coralData = (function(){
+  var coralData = null;
+  $.ajax({
+    url: 'coral-results.json',
+    async: false,
+    dataType: 'json',
+    success: function(response){
+      coralData = response;
+    }
+  });
+  return coralData;
+})();
+/* End shallow reef */
+
+/* Deep reef data */
+var deepData = (function(){
+  var deepData = null;
+  $.ajax({
+    url: 'deep-results.json',
+    async: false,
+    dataType: 'json',
+    success: function(response){
+      deepData = response;
+    }
+  });
+  return deepData;
+})();
+/* End deep reef data */
+
+/* Seagrass Density data */
+var seagrassData = (function(){
+  var seagrassData = null;
+  $.ajax({
+    url: 'seagrass-results.json',
+    async: false,
+    dataType: 'json',
+    success: function(response){
+      seagrassData = response;
+    }
+  });
+  return seagrassData;
+})();
+/* End Seagrass Density data  */
+
+/* Seagrass Cover data */
+var seagrassCover = (function(){
+  var seagrassCover = null;
+  $.ajax({
+    //url: 'seagrass-cover.json',
+    url: 'seagrass-results.json',
+    async: false,
+    dataType: 'json',
+    success: function(response){
+      seagrassCover = response;
+    }
+  });
+  return seagrassCover;
+})();
+/* End Seagrass Cover data */
+
+/* ARRAS data */
+var arrasData = (function(){
+  var arrasData = null;
+  $.ajax({
+    url: 'arras-results.json',
+    async: false,
+    dataType: 'json',
+    success: function(response){
+      arrasData = response;
+    }
+  });
+  return arrasData;
+})();
+/* End ARRAS data */
+
+/* Mangrove data viewed as stacked chart */
+
+var mangroveData = (function(){
+  var mangroveData = null;
+  $.ajax({
+    url: 'mangrove-results.json',
+    async: false,
+    dataType: 'json',
+    success: function(response){
+      mangroveData = response;
+    }
+  });
+  return mangroveData;
+})();
+/* End mangrove data*/
+
+/* Coastal Stability data; */
+
+var coastalData = (function(){
+  var coastalData = null;
+  $.ajax({
+    url: 'coastal-results.json',
+    async: false,
+    dataType: 'json',
+    success: function(response){
+      coastalData = response;
+    }
+  });
+  return coastalData;
+})();
+/* End coastal data*/
+
+
+
+/* End variables from external JSON files */
+
+
+/* F U N C T I O N S */
+
+/*
+ *  Method for opening external text file
+ *  Parameters: file location, NIPAS site location ID, DIV component id
+ *  Source: https://stackoverflow.com/questions/14446447/javascript-read-local-text-file
+ */ 
+function openText(fileLocation, loc_id, component){
+
+  // Concatenate file location and NIPAS id
+  var textFilePath = fileLocation + loc_id +  '.txt'; 
+  var rawFile = new XMLHttpRequest();
+  rawFile.open("GET", textFilePath, true);
+
+  // HTTP request
+  rawFile.onreadystatechange = function ()
+  {
+        if(rawFile.readyState === 4)
+        {
+          if(rawFile.status === 200 || rawFile.status === 0)
+          {
+              // Document successfully fetched
+              var allText = rawFile.responseText;
+              document.getElementById(component).innerHTML = '';
+              document.getElementById(component).innerText = allText;
+          }
+        }
+  }
+  
+  rawFile.send();
+} /* End openText function */
+
+/*
+ *  Method for creating a Bootstrap carousel anywhere in the website
+ *  Parameters: NIPAS Id, File path for images, DIV id, Arbitrary carousel ID, Artbitrary Image ID
+ */
+function addCarousel(loc_id, filePath, component, carouselId, imagesId){
+  var carouselContent = '';
+  var imagesFilePath = filePath + loc_id +'/';
+
+  $.ajax({
+
+      // AJAx POST Request
+      // Using getImages.php file
+      type: 'POST',
+      url: "./getImages.php",
+      data: { 'path' : imagesFilePath },
+      success: function(data, status){
+          
+          // Creation of the carousel components
+          var carousel_indicator = '<ul class="carousel-indicators">';
+          var inner_carousel     = '<div class="carousel-inner">';
+
+          data = $.parseJSON(data);
+
+          for(var i = 0; i < data.length; i++) {
+            if( i == 0){
+              carousel_indicator += '<li data-target="#'+ carouselId +'" data-slide-to="'+ i +'" class="active"></li>';
+              inner_carousel += '<div class="carousel-item active">'+
+                      '<img class="d-block img-fluid" src="'+ imagesFilePath + data[i] +'" width="100%"></div>';
+
+            }else{
+              carousel_indicator += '<li data-target="#'+ carouselId +'" data-slide-to="'+ i +'"></li>';
+              inner_carousel += '<div class="carousel-item">'+
+                        '<img class="d-block img-fluid" src="'+ imagesFilePath + data[i] +'" width="100%"></div>';
+            }
+          } // End for loop
+
+          // Add closing tags
+          carousel_indicator  += '</ul>';
+          inner_carousel      += '</div>';
+          carouselContent     += '<div id="'+ imagesId +'" class="carousel slide" data-ride="carousel">';
+          carouselContent     += carousel_indicator;
+          carouselContent     += inner_carousel;
+
+        // Adding NEXT and PREVIOUS button to the carousel images  
+        carouselContent += '<a class="carousel-control-prev" href="#'+ imagesId +'" role="button" data-slide="prev">' +
+                '<span class="carousel-control-prev-icon" aria-hidden="true" style="background-color: black;"></span><span class="sr-only">Previous</span></a>' +
+                '<a class="carousel-control-next" href="#'+ imagesId +'" role="button" data-slide="next">' +
+                '<span class="carousel-control-next-icon" aria-hidden="true" style="background-color: black;"></span><span class="sr-only">Next</span>' +
+                '</a></div>';
+
+        // Embed the created carousel of images inside the website
+        document.getElementById(component).innerHTML = carouselContent;
+       }
+    });
+
+    // Display default image if images in the location is not found
+    if( carouselContent == ''){
+      document.getElementById(component).innerHTML = '<img src="carousel.png" onerror="onError(this)" width="100%" />';
+    }
+
+} /* End addCarousel function */
+
+/*
+ * Viewing additional NIPAS information
+ * Opens the sidebar
+ */
+function viewnipasInfo(id){
+
+  // Expand the sidebar
+  sidebar.open('nipas-details');
+
+  // Zoom to a particular marker
+  // Places a 0.5 degree offset on the zoomed marker (0.5 degrees to the right).
+  var ofset=nipasMarkers[id].lon - 0.65;
+  map.setView( [ nipasMarkers[id].lat, nipasMarkers[id].lon ],10);
+  
+  var sidebarElement = document.getElementById('nipas-content');
+  var content = '<h3 class="alert-heading">'+nipasMarkers[id].nipas_name+'</h3>';
+  content += '<div id=\'nipas-desc\' class=\'fontSize-medium\' style="font-size: 1.2em; text-align: justify;"></div><br>';
+  content = content +
+  '<br><table class=\'table table-sm\'>'+
+    '<tr>'+
+      '<th scope="row" colspan="2">Longitude: </th>'+
+      '<td>'+ nipasMarkers[id].lon +'</td>'+
+    '</tr>'+
+    '<tr>'+
+      '<th scope="row" colspan="2">Latitude: </th>'+
+      '<td>'+ nipasMarkers[id].lat +'</td>'+
+    '</tr>'+
+    '<tr>'+
+      '<th scope="row" colspan="2">Municipality: </th>'+
+      '<td>'+ nipasMarkers[id].municipality +'</td>'+
+    '</tr>'+
+    '<tr>'+
+      '<th scope="row" colspan="2">Area: </th>'+
+      '<td>'+ nipasMarkers[id].area +' hectares</td>'+
+    '</tr>'+
+    '<tr>'+
+      '<th scope="row" colspan="2">Year Established: </th>'+
+      '<td>'+ nipasMarkers[id].year_established +'</td>'+
+        '<tr>'+
+      '<th scope="row" colspan="2">Coral Area: </th>'+
+      '<td>'+ nipasMarkers[id].coral_area +' hectares</td>'+
+       '<tr>'+
+       '<th scope="row" colspan="2">Mangrove Area: </th>'+
+      '<td>'+ nipasMarkers[id].mangrove_area +' hectares</td>'+
+       '<tr>'+
+       '<th scope="row" colspan="2">Seagrass Area: </th>'+
+      '<td>'+ nipasMarkers[id].seagrass_area +' hectares</td>'+
+    '<tr style="list-style:none";>'+
+      '<ul>'+
+      '<th scope="row" colspan="2">Downloadable Links: </th>'+
+      '<td>'+'<li>'+'<a href="files/proclamations/' + nipasMarkers[id].filename + '" download="' + nipasMarkers[id].filename + '"><download>Legal Document</a>'+ '<li>'+'<a href="files/site_description/'+ nipasMarkers[id].locID + '.pdf" download="' + nipasMarkers[id].locID + '.pdf"><download>NIPAS Poster</a>' +'</td>'+'</li>'+'</li>'+
+    '</ul>'+
+  '</tr>'+
+  '</table><br/>';
+  sidebarElement.innerHTML = content;
+
+  // Generate data from CoRVA components  
+  document.getElementById('nipas-tab').style.display = "flex";
+  var nipasData = document.getElementById('nipas-data');
+  var nipasDataContent = '<ul class="nav nav-pills" id="pills-tab" role="tablist">'+
+      '<li class="nav-item"><a class="nav-link active" id="pills-arras-tab" data-toggle="pill" href="#pills-arras" role="tab">ARRAS</a></li>'+
+      '<li class="nav-item"><a class="nav-link" id="pills-shallow-tab" data-toggle="pill" href="#pills-shallow" role="tab">Shallow Reef</a></li>'+
+      '<li class="nav-item"><a class="nav-link" id="pills-fish-tab" data-toggle="pill" href="#pills-fish" role="tab" >Reef Fish</a></li>'+
+      '<li class="nav-item"><a class="nav-link" id="pills-mangrove-tab" data-toggle="pill" href="#pills-mangrove" role="tab" >Mangrove</a></li>'+
+      '<li class="nav-item"><a class="nav-link" id="pills-seagrass-tab" data-toggle="pill" href="#pills-seagrass" role="tab" >Seagrass</a></li>'+
+      '<li class="nav-item"><a class="nav-link" id="pills-deep-coral-tab" data-toggle="pill" href="#pills-deep" role="tab">Deep Coral</a></li>'+
+      '<li class="nav-item"><a class="nav-link" id="pills-coastal-tab" data-toggle="pill" href="#pills-coastal" role="tab" >Coastal Stability</a></li>'+
+      '<li class="nav-item"><a class="nav-link" id="pills-connectivity-tab" data-toggle="pill" href="#pills-connectivity" role="tab" >Connectivity</a></li>'+
+      '<li class="nav-item"><a class="nav-link" id="pills-management-tab" data-toggle="pill" href="#pills-management" role="tab" >Management</a></li>'+
+      '</ul>';
+  
+  // NIPAS DATA
+  nipasDataContent += '<div class="tab-content" id="pills-tabContent">';
+  nipasDataContent += '<div class="tab-pane active" id="pills-arras" role="tabpanel"><br/>' + 
+  				      '<p style="font-size: 1.4em;text-align: justify;">Large-scale reef assessment was conducted using the <a href="#" onClick="viewMethodDescription(\'arras-link\')">ARRAS technologies</a>.</p><br/>' +
+  				      '<div id="arrasData"></div></div>';
+  nipasDataContent += '<div class="tab-pane" id="pills-shallow" role="tabpanel">' + 
+  					  '<p style="font-size: 1.4em;text-align: justify;">Coral Survey uses a combined <a href="#" onClick="viewMethodDescription(\'shallow-reef-link\')">Reef Check and GEF-CRTR protocol</a>.</p>' +
+  					  '<br/><div id=\'coral-data\' style="width: 700px; height: 500px;"></div><br/><div id="coral-carousel"></div></div>';
+  nipasDataContent += '<div class="tab-pane" id="pills-fish" role="tabpanel">' +
+  					  '<p style="font-size: 1.4em;text-align: justify;">Reef fish communities were assessed using <a href="#" onClick="viewMethodDescription(\'reef-fish-link\')">fish visual census</a>.</p>' +
+  					  '<br/><div id=\'fish-data-sp\' style="width: 680px; height: 500px;"></div><hr/><div id=\'fish-data-den\' style="width: 680px; height: 500px;"></div><br/><hr/><div id=\'fish-data-bio\' style="width: 680px; height: 500px;"></div></div>';
+  nipasDataContent += '<div class="tab-pane" id="pills-coastal" role="tabpanel"></div>';
+  nipasDataContent += '<div class="tab-pane" id="pills-connectivity" role="tabpanel"><br><div class="row"><div class="col-lg-12 col-md-12">' + 
+  					  '<p style="font-size: 1.4em;text-align: justify;">To know the extent to which population of marine organisms are linked, we used the HYCOM model to <a href="#" onClick="viewMethodDescription(\'connectivity-link\')">simulate dispersal pattern </a>for coral larvae.</p>' + 
+  					  '<img src=\'files/connectivity/'+ nipasMarkers[id].locID +'.gif\' width="100%"><br/><br/><div id="connectivity-carousel"></div>' + '</div></div></div>';
+//JC Mangrove
+// nipasDataContent += '<div class="tab-pane" id="pills-mangrove" role="tabpanel">' + 
+//  					  '<p style="font-size: 1.4em;text-align: justify;">Mangroves were assessed using <a href="#" onClick="viewMethodDescription(\'mangrove-link\')">this method</a>.</p>' +
+//  					  '<br/><br/><div id="mangrove-data-stem" style="width: 680px; height:520px;"></div></br><div id = "mybuttons" style="position: relative; left:40px; top: -20px;"> <button type="button" onclick="Inc()">Prev</button> <button type="button" onclick="Dec()">Next</button></div><br/><div id="mangrove-data-canopy" style="width: 680px; height:520px;"></div><br/><div id="mangrove-data-basal" style="width: 680px; height:520px;"></div><br/>' + 
+//  					  '<div id="mangrove-carousel"></div></div>';
+nipasDataContent += '<div class="tab-pane" id="pills-mangrove" role="tabpanel">' + 
+              '<p style="font-size: 1.4em;text-align: justify;">Mangroves were assessed using <a href="#" onClick="viewMethodDescription(\'mangrove-link\')">this method</a>.</p>' +
+              '<br/><br/><div id="jmangrove"style="font-size: 150%;"><p><b>Survey Date: </b><span id="SurveyDate" style="color: blue;"></span></p></div><div id="mangrove-data-stem" style="width: 680px; height:450px;"></div><br/> <div id = "mybuttons" style="position: relative; left:40px; top: -20px;"> <button type="button" onclick="Inc()">Prev</button> <button type="button" onclick="Dec()">Next</button></div><br/>' + 
+              '<div id="mangrove-carousel"></div></div>';
+  nipasDataContent += '<div class="tab-pane" id="pills-management" role="tabpanel">'+ 
+  					  '<br/><div id="management_desc" style="font-size: 1.4em; text-align: justify;"></div><br/>' + 
+  					  '<img class="project_images rounded mx-auto d-block" src=\"files/management/'+nipasMarkers[id].locID +'.png\" onerror=\"onError(this);\" width=\"100%\"\'></div>';
+  nipasDataContent += '<div class="tab-pane" id="pills-seagrass" role="tabpanel">' + 
+  					  '<p style="font-size: 1.4em;text-align: justify;">Seagrasses were assessed using <a href="#" onClick="viewMethodDescription(\'seagrass-link\')">this method</a>.</p>' +
+  					  '<br/><div id=\'seagrass-pie\' style="width: 700px; height: 500px;"></div><br/><div id="seagrass-data" style="width: 680px; height:520px;"></div><br/><br/><div id="seagrass-carousel"></div></div>';
+  nipasDataContent += '<div class="tab-pane" id="pills-deep" role="tabpanel">' + 
+  					  '<div id="deep-desc"></div><br/><div id="deep-data" style="width: 700px; height: 500px;"><br/></div></div>';
+  nipasDataContent += '</div>';
+  nipasDataContent += '</div>'; // There is one missing closing </div>.
+  nipasData.innerHTML = nipasDataContent;
+
+  // Pie chart for Corals 
+  loadCoralData(nipasMarkers[id].locID);
+
+  // Stacked chart for Fish
+  loadFishData(nipasMarkers[id].locID, fishDataSP, 'Species Count','fish-data-sp','species/500m2');
+  loadFishData(nipasMarkers[id].locID, fishDataDEN, 'Mean Abundance','fish-data-den','mt/km2');
+  loadFishData(nipasMarkers[id].locID, fishDataBIO, 'Mean Biomass','fish-data-bio','individuals/500m2');
+
+  // Stacked chart for Mangrove
+  MyType="mangrove";
+  loadMangroveData(nipasMarkers[id].locID, mangroveData, 'mangrove-data-stem', 'stem density', 'Stem Density', 'Average / m2');
+  //loadMangroveData(nipasMarkers[id].locID, mangroveData, 'mangrove-data-canopy', 'canopy cover', 'Canopy Cover', '% Average of species in m2');
+  //loadMangroveData(nipasMarkers[id].locID, mangroveData, 'mangrove-data-basal', 'basal area', 'Basal Area', '& Average of species in m');
+
+  // Pie chart for Seagrass 
+  loadSeagrassPieData(nipasMarkers[id].locID);
+  // Stacked chart for Seagrass
+  loadSeagrassData(nipasMarkers[id].locID, seagrassData, 'seagrass-data');
+
+  // Images and remarks for Coastal
+  loadCoastalData( nipasMarkers[id].locID, coastalData );
+
+  // Stacked chart for deep reef
+  loadDeepData(nipasMarkers[id].locID, 'deep-data', 'deep-desc');
+
+  // Fetch text files from folders
+  openText('files/desc/', nipasMarkers[id].locID, 'nipas-desc')
+  openText('files/management/', nipasMarkers[id].locID, 'management_desc');
+
+  // Add image slider (carousel)
+  addCarousel(nipasMarkers[id].locID, 'files/connectivity/_images/','connectivity-carousel','connectivityDemo','connectivityImages');
+  addCarousel(nipasMarkers[id].locID, 'files/arras/_images/', 'arrasData','arrasDemo', 'arrasImages');
+  addCarousel(nipasMarkers[id].locID, 'files/seagrass/_images/', 'seagrass-carousel','seagrassDemo', 'seagrassImages');
+  addCarousel(nipasMarkers[id].locID, 'files/deep/_images/','deep-carousel','deepDemo', 'deepImages');
+  addCarousel(nipasMarkers[id].locID, 'files/shallow/_images/', 'coral-carousel','shallowDemo', 'shallowImages');
+  addCarousel(nipasMarkers[id].locID, 'files/mangrove/_images/','mangrove-carousel','mangroveDemo','mangroveImages');
+}
+
+
+// This function gets input from the current value of the region dropdown
+function loadProvinces(){
+  var regionID_currentValue = document.getElementById('regionDropdown').value;
+
+  // Populating the dropdown menu
+  for(j=document.nipasFilter.provinceDropdown.options.length-1;j>=0;j--){
+    document.nipasFilter.provinceDropdown.remove(j);
+  }
+
+  var optn = document.createElement("OPTION");
+  optn.text = "Select Province";
+  optn.value = '';
+  document.nipasFilter.provinceDropdown.options.add(optn);
+
+  // Adding options to the dropdown
+  for (i=0;i<nipasMarkers.length;i++){
+    if(nipasMarkers[i].region_id == regionID_currentValue){
+      var optn = document.createElement("OPTION");
+      optn.text = nipasMarkers[i].province_name;
+      optn.value = nipasMarkers[i].province_id;
+      document.nipasFilter.provinceDropdown.options.add(optn);
+    }
+
+  }
+}
+
+/*
+ *  This method is responsible for filtering the list of NIPAS sites in the sidebar
+ *  Computation for total area is included 
+ */
+function filter(){
+
+  // Defining local variables
+  var nipasList = document.getElementById('list-nipasSites');
+  var nipasArea = document.getElementById('nipas-totalArea');
+  var regionID  = document.getElementById('regionDropdown').value;
+  var content   = '';
+  var totalArea = 0;
+
+  // clears the list
+  nipasList.innerHTML = '';
+
+  if(regionID != ''){
+    for(var i=0;i < nipasMarkers.length;i++){
+      if(nipasMarkers[i].region_id == regionID){
+
+        // Filtered list
+        content = content + '<a href="#" onclick="viewnipasInfo('+(i)+');" class=\'list-group-item list-group-item-action\'>' + nipasMarkers[i].nipas_name + '</a>';
+        totalArea =+ nipasMarkers[i].area;
+      }
+    }
+  }else{
+    for(var i=0;i < nipasMarkers.length;i++){
+
+      // All NIPAS sites
+      content = content + '<a href="#" onclick="viewnipasInfo('+(i)+');" class=\'list-group-item list-group-item-action\'>' + nipasMarkers[i].nipas_name + '</a>';
+      totalArea =+ nipasMarkers[i].area;
+    }
+  }
+
+  nipasList.innerHTML = content;
+
+  // Display total area
+  nipasArea.innerHTML = '<strong style=\'font-size: 1.2em;\'>Total Area:</strong> '+totalArea+' HECTARES.'; 
+}
+
+/*
+ * Display a default image if no data is found
+ */
+function onError(image){
+  image.onError = "";
+  image.src = "files/err/no_data.png";
+  return true;
+}
+
+/* 
+ *  Create a pie chart for existing coral data on each NIPAS site
+ */
+function loadCoralData(id){
+
+  var chartData = {};
+  var arrayYear = [];
+  var count = 0;
+  for(i = 0; i < coralData.length ; i++){
+    // NIPAS site specific
+    if(coralData[i].loc_id == id){
+      chartData[coralData[i].monitor_year] = [
+        {"Category": "Hard Coral", "size": coralData[i].HC_cover},
+        {"Category": "Algal Assemblage", "size": coralData[i].AA_cover},
+        {"Category": "Abiotic", "size": coralData[i].AB_cover},
+        {"Category": "Macroalgae", "size": coralData[i].MA_cover},
+        {"Category": "Halimeda", "size": coralData[i].HA_cover},
+        {"Category": "Other Biota", "size": coralData[i].OB_cover}
+      ];
+      var chartTitle = coralData[i].monitor_site + " Coral Data";
+      var remarks = '<br/><p style="font-size: 1.4em;">' + coralData[i].remarks + '</p>';
+      arrayYear[count] = coralData[i].monitor_year;
+      count++;
+    }
+  }
+
+  arrayYear.sort();
+
+  if( Object.keys(chartData).length > 0){   
+    var chart = AmCharts.makeChart( "coral-data", {
+      "type"          : "pie",
+      "theme"         : "light",
+      "dataProvider"  : chartData,
+      "valueField"    : "size",
+      "titleField"    : "Category",
+      "startDuration" : 0,
+      "innerRadius"   : 80,
+      "pullOutRadius" : 20,
+      "marginTop"     : 50,
+      "titles": [{
+          "text": chartTitle
+      }],
+      "allLabels": [{
+        "y"       : "54%",
+        "align"   : "center",
+        "size"    : 25,
+        "bold"    : true,
+        "text"    : "currentYear",
+        "color"   : "#555",
+      }, {
+        "y"       : "49%",
+        "align"   : "center",
+        "size"    : 15,
+        "text"    : "Year",
+        "color"   : "#555"
+      }],
+      "listeners": [ {
+        "event": "init",
+        "method": function( e ) {
+          
+          var chart = e.chart;
+        count = 0;
+        function getCurrentData() {
+          var data = chartData[arrayYear[count]];
+          count++;
+          if (count >= arrayYear.length) {count = 0;}
+          return data;
+        }
+
+        function loop() {
+          chart.allLabels[0].text = arrayYear[count];
+          var data = getCurrentData();
+          chart.animateData( data, {
+            duration: 1000,
+            complete: function() {
+              setTimeout( loop, 3000 );
+            }
+          } );
+        }
+          loop();
+        }
+      } ],
+       "export": {
+          // Export options 
+          "enabled": true,
+          "beforeCapture": function(menuConfig) {
+          //var url = "http:\\\\localhost\\training\\DENR.png"; 
+          var url = "images/logo/agoscorva.png"; 
+          var setup = this.setup;
+            var timer = setInterval(function() {
+              if (setup.fabric) {
+                var canvas = setup.fabric;
+                clearTimeout(timer);
+                canvas.setOverlayImage(url, canvas.renderAll.bind(canvas),{
+                  scaleX: 0.6,
+                  scaleY: 0.6,
+                  originX: 'left',
+                  originY: 'top'
+                });
+              }
+            }, 100);
+          }
+        }
+    } );
+                                          
+  }else{
+    // Show no data image if NIPAS site has not been surveryed
+    document.getElementById('coral-data').innerHTML = '<center><img src="files/err/no_data.png" width="100%" style="margin-top: 15px;"></center>';        
+  }
+  
+  return chartData;
+}
+
+/*
+ *  This method creates a Pie Chart using Deep Coral data
+ *  Utilizes the AmCharts JS Library
+ */
+function loadDeepData(id, chartComponent, descComponent){
+  var chartData = {};
+  var arrayYear = [];
+  var count = 0;
+  for(i = 0; i < deepData.length ; i++){
+    // NIPAS site specific
+    if(deepData[i].loc_id == id){
+      chartData[deepData[i].survey_date] = [
+        {"Category": "Live Coral",  "size"  : deepData[i].live_coral},
+        {"Category": "Sand/Rubble", "size"  : deepData[i].sand_rubble},
+        {"Category": "Dead Coral",  "size"  : deepData[i].dead_coral},
+        {"Category": "Others",      "size"  : deepData[i].other}
+      ];
+      arrayYear[count] = deepData[i].survey_date;
+      count++;
+      var chartTitle  = "Substrate Composition";
+      var remarks     = '<br/><p style="font-size: 1.4em; text-align: justify;">' + deepData[i].remarks + '<br/>Deep or mesophotic coral reefs were (30m-40m) documented using <a href="#" onClick="viewMethodDescription(\'deep-coral-link\')">ROVs, echosounders, and manual surveys</a>.<br/>'+
+                '<p style="font-size: 1.4em; text-align: justify;"><strong>Date of survey: </strong>'+ deepData[i].survey_date+'<br/>'+
+                '<strong>Depth: </strong>'+ deepData[i].depth+' meters<br/>'+
+                '<strong>Temperature: </strong>'+ deepData[i].temperature+' &deg;C <br/>'+
+                '<strong>Species Observed: </strong><i>'+ deepData[i].species_richness+'</i><br/></p>'+
+                '<div id="deep-carousel"></div>';
+    }
+  }
+
+  arrayYear.sort();
+
+  if( Object.keys(chartData).length > 0 ){
+
+    var chart = AmCharts.makeChart( chartComponent , {
+      "type"          : "pie",
+      "theme"         : "light",
+      "dataProvider"  : chartData,
+      "valueField"    : "size",
+      "titleField"    : "Category",
+      "startDuration" : 0,
+      "innerRadius"   : 80,
+      "pullOutRadius" : 20,
+      "marginTop"     : 50,
+      "titles": [{
+        "text": chartTitle
+      }],
+      "allLabels": [{
+        "y"       : "54%",
+        "align"   : "center",
+        "size"    : 25,
+        "bold"    : true,
+        "text"    : "currentYear",
+        "color"   : "#555",
+      }, {
+        "y"       : "49%",
+        "align"   : "center",
+        "size"    : 15,
+        "text"    : "Year",
+        "color"   : "#555"
+      }],
+      "listeners": [ {
+        "event": "init",
+        "method": function( e ) {
+          
+          var chart = e.chart;
+          count = 0;
+        function getCurrentData() {
+          var data = chartData[arrayYear[count]];
+          count++;
+          if (count >= arrayYear.length) {count = 0;}
+          return data;
+        }
+
+        function loop() {
+          chart.allLabels[0].text = arrayYear[count];
+          var data = getCurrentData();
+          chart.animateData( data, {
+            duration: 1000,
+            complete: function() {
+              setTimeout( loop, 3000 );
+            }
+          } );
+        }
+
+          loop();
+        }
+      } ],
+       "export": {
+          // Export options 
+          "enabled": true,
+          "beforeCapture": function(menuConfig) {
+          //var url = "http:\\\\localhost\\training\\DENR.png"; 
+          var url = "images/logo/agoscorva.png"; 
+          var setup = this.setup;
+            var timer = setInterval(function() {
+              if (setup.fabric) {
+                var canvas = setup.fabric;
+                clearTimeout(timer);
+                canvas.setOverlayImage(url, canvas.renderAll.bind(canvas),{
+                  scaleX: 0.6,
+                  scaleY: 0.6,
+                  originX: 'left',
+                  originY: 'top'
+                });
+              }
+            }, 100);
+          }
+        }
+    } );
+
+    // Add remarks at the bottom of the pie chart
+    document.getElementById(descComponent).innerHTML = remarks;                                     
+  }else{
+
+    // Show no data image if NIPAS site has not been surveryed
+    document.getElementById(chartComponent).innerHTML = '<center><img src="files/err/no_data.png" width="100%" style="margin-top: 15px;"></center>';        
+  }
+  
+  return chartData;
+}
+
+/*
+ *  This method utilizes the AmCharts JS library to create a stacked chart of FISH data
+ */
+function loadFishData(id, data, type, component, _givenLabel){
+  
+  // component identifies which <DIV> component holds the stacked graph
+  var chartData   = [];
+  var arrayYear = [];
+  var count = 0;
+  var year = 0;
+  
+  for(i = 0, j = 0; i < data.length ; i++){
+    // NIPAS site specific
+    if(data[i].loc_id == id){
+      chartData = [{
+        "type"  : "Benthic Invertivore", 
+        "mpa"   : data[i].mpa_benthic,  
+        "out"   : (-1)*data[i].out_benthic 
+      },{
+        "type"  : "Corallivore", 
+        "mpa"   : data[i].mpa_corallivore,  
+        "out"   : (-1)*data[i].out_corallivore 
+      },{
+        "type"  : "Detritivore", 
+        "mpa"   : data[i].mpa_detritivore,  
+        "out"   : (-1)*data[i].out_detritivore 
+      },{
+        "type"  : "Herbivore", 
+        "mpa"   : data[i].mpa_herbivore,  
+        "out"   : (-1)*data[i].out_herbivore 
+      },{
+        "type"  : "Omnivore", 
+        "mpa"   : data[i].mpa_omnivore,  
+        "out"   : (-1)*data[i].out_omnivore 
+      },{
+        "type"  : "Piscivore", 
+        "mpa"   : data[i].mpa_piscivore,  
+        "out"   : (-1)*data[i].out_piscivore 
+      },{
+        "type"  : "Planktivore", 
+        "mpa"   : data[i].mpa_planktivore,  
+        "out"   : (-1)*data[i].out_planktivore 
+      }];
+    arrayYear = data[count].survey_date;
+    year = data[count].survey_date;
+    count++;
+    }
+  }
+  
+  if( chartData.length == 0){ document.getElementById('pills-fish').innerHTML = '<center><img src="files/err/no_data.png" width="100%" style="margin-top: 15px;"></center>'; return; }
+  // console.log("chartData");
+   
+  var chart = AmCharts.makeChart( component , {
+      "type"         : "serial",
+      "theme"        : "light",
+      "rotate"       : true,
+      "marginBottom" : 50,
+      "dataProvider" : chartData,
+      "titles": [{
+      "text": type + " for " + year,
+      "size": 12
+      }],
+      "startDuration": 1,
+      "graphs": [{
+        "fillAlphas": 0.8,
+        "lineAlpha": 0.2,
+        "type": "column",
+        "valueField": "mpa",
+        "title": "MPA",
+        "labelText": "[[value]]",
+        "clustered": false,
+        "labelFunction": function(item) {
+          return Math.abs(item.values.value);
+        },
+        "balloonFunction": function(item) {
+          return item.category + ": " + Math.abs(item.values.value);
+        }
+      }, {
+        "fillAlphas": 0.8,
+        "lineAlpha": 0.2,
+        "type": "column",
+        "valueField": "out",
+        "title": "OUT",
+        "labelText": "[[value]]",
+        "clustered": false,
+        "labelFunction": function(item) {
+          return Math.abs(item.values.value);
+        },
+        "balloonFunction": function(item) {
+          return item.category + ": " + Math.abs(item.values.value);
+        }
+      }],
+      "categoryField": "type",
+      "categoryAxis": {
+        "gridPosition": "start",
+        "gridAlpha": 0.2,
+        "axisAlpha": 0
+      },
+      "valueAxes": [{
+        "gridAlpha": 0,
+        "ignoreAxisWidth": true,
+        "labelFunction": function(value) {
+          return Math.abs(value);
+        },
+        "guides": [{
+          "value": 0,
+          "lineAlpha": 0.2
+        }]
+      }],
+      "balloon": {
+        "fixedPosition": true
+      },
+      "chartCursor": {
+        "valueBalloonsEnabled": false,
+        "cursorAlpha": 0.05,
+        "fullWidth": true
+      },
+      "export": {
+            //  Export options
+            "enabled": true,
+            "beforeCapture": function(menuConfig) {
+          //var url = "http:\\\\localhost\\training\\DENR.png"; 
+          var url = "images/logo/agoscorva.png"; 
+          var setup = this.setup;
+            var timer = setInterval(function() {
+              if (setup.fabric) {
+                var canvas = setup.fabric;
+                clearTimeout(timer);
+                canvas.setOverlayImage(url, canvas.renderAll.bind(canvas),{
+                  scaleX: 0.6,
+                  scaleY: 0.6,
+                  originX: 'left',
+                  originY: 'top'
+                });
+              }
+            }, 100);
+          }
+      },
+        // X and Y axis labels
+      "allLabels": [{
+        "text": "MPA",
+        "x": "28%",
+        "y": "97%",
+        "bold": true,
+        "align": "middle"
+      }, {
+        "text": "OUT",
+        "x": "75%",
+        "y": "97%",
+        "bold": true,
+        "align": "middle"
+      }]
+  });
+
+  return chartData;
+}
+
+// // Note 3 graphs dapat
+// /*
+//  *  This method creates a stacked chart for available Mangrove data
+//  *  Uses the AmCharts JS library
+//  */
+
+//insert JCs function loadMangroveData() HERE!
+
+
+// START KUYA JO MANGROVE CHART INSTANTIATE
+ function loadMangroveData(id, data, component, type, header, legend){
+   var chartData   = [];
+
+   Index=0;
+   ManLocId=id;
+   UpdateYear();
+   UpdateData();
+
+  return chartData;
+}
+// END KUYA JO MANGROVE CHART INSTANTIATE
+
+
+/* 
+ *  Create a pie chart for available Seagras data on each NIPAS site
+ */
+function loadSeagrassPieData(id){
+
+  var chartData = {};
+  var arrayYear = [];
+  var count = 0;
+  for(i = 0; i < seagrassCover.length ; i++){
+    // NIPAS site specific
+    if(seagrassCover[i].loc_id == id){
+
+      var sum = parseInt(seagrassCover[i].E_acor)+parseInt(seagrassCover[i].T_hem)+parseInt(seagrassCover[i].C_ser)+parseInt(seagrassCover[i].C_rot)+parseInt(seagrassCover[i].H_uni)+parseInt(seagrassCover[i].H_pini)+parseInt(seagrassCover[i].H_min)+parseInt(seagrassCover[i].H_deci)+parseInt(seagrassCover[i].H_ova)+parseInt(seagrassCover[i].H_spi)+parseInt(seagrassCover[i].S_iso);
+      var E_acor = seagrassCover[i].E_acor/sum;
+      var T_hem = seagrassCover[i].T_hem/sum;
+      var C_ser = seagrassCover[i].C_ser/sum;
+      var C_rot = seagrassCover[i].C_rot/sum;
+      var H_uni = seagrassCover[i].H_uni/sum;
+      var H_pini = seagrassCover[i].H_pini/sum;
+      var H_min = seagrassCover[i].H_min/sum;
+      var H_deci = seagrassCover[i].H_deci/sum;
+      var H_ova = seagrassCover[i].H_ova/sum;
+      var H_spi = seagrassCover[i].H_spi/sum;
+      var S_iso = seagrassCover[i].S_iso/sum;
+
+      chartData[seagrassCover[i].survey_date] = [
+        {"Category": "Enhalus acoroides", "size": E_acor},
+        {"Category": "Thalassia hemprichii", "size": T_hem},
+        {"Category": "Cymodocea serrulata", "size": C_ser},
+        {"Category": "Cymodocea rotundata", "size": C_rot},
+        {"Category": "Halodule uninervis", "size": H_uni},
+        {"Category": "Halodule pinifolia", "size": H_pini},
+        {"Category": "Halophila minor", "size": H_min},
+        {"Category": "Halophila decipiens", "size": H_deci},
+        {"Category": "Halophila ovalis", "size": H_ova},
+        {"Category": "Halophila spinulosa", "size": H_spi},
+        {"Category": "Syringodium isoetifolium", "size": S_iso}
+      ];
+      var chartTitle = "Seagrass Cover";
+      var remarks = '<br/><p style="font-size: 1.4em;">' + seagrassCover[i].remarks + '</p>';
+      arrayYear[count] = seagrassCover[i].survey_date;
+      count++;
+    }
+  }
+  
+  arrayYear.sort();
+  
+  if( Object.keys(chartData).length > 0){
+    
+    var chart = AmCharts.makeChart( "seagrass-pie", {
+      "type"          : "pie",
+      "theme"         : "light",
+      "dataProvider"  : chartData,
+      "valueField"    : "size",
+      "titleField"    : "Category",
+      "startDuration" : 0,
+      "innerRadius"   : 80,
+      "pullOutRadius" : 20,
+      "marginTop"     : 50,
+      "titles": [{
+          "text": chartTitle
+      }],
+      "allLabels": [{
+        "y"       : "54%",
+        "align"   : "center",
+        "size"    : 25,
+        "bold"    : true,
+        "text"    : "currentYear",
+        "color"   : "#555",
+      }, {
+        "y"       : "49%",
+        "align"   : "center",
+        "size"    : 15,
+        "text"    : "Year",
+        "color"   : "#555"
+      }],
+      "listeners": [ {
+        "event": "init",
+        "method": function( e ) {
+          
+          var chart = e.chart;
+        count = 0;
+        function getCurrentData() {
+          var data = chartData[arrayYear[count]];
+          count++;
+          if (count >= arrayYear.length) {count = 0;}
+          return data;
+        }
+
+        function loop() {
+          chart.allLabels[0].text = arrayYear[count];
+          var data = getCurrentData();
+          chart.animateData( data, {
+            duration: 1000,
+            complete: function() {
+              setTimeout( loop, 3000 );
+            }
+          } );
+        }
+
+          loop();
+        }
+      } ],
+       "export": {
+          // Export options 
+          "enabled": true,
+          "beforeCapture": function(menuConfig) {
+          //var url = "http:\\\\localhost\\training\\DENR.png"; 
+          var url = "images/logo/agoscorva.png"; 
+          var setup = this.setup;
+            var timer = setInterval(function() {
+              if (setup.fabric) {
+                var canvas = setup.fabric;
+                clearTimeout(timer);
+                canvas.setOverlayImage(url, canvas.renderAll.bind(canvas),{
+                  scaleX: 0.6,
+                  scaleY: 0.6,
+                  originX: 'left',
+                  originY: 'top'
+                });
+              }
+            }, 100);
+          }
+        }
+    } );
+                                          
+  }else{
+    // Show no data image if NIPAS site has not been surveyed
+    document.getElementById('pills-seagrass').innerHTML = '<center><img src="files/err/no_data.png" width="100%" style="margin-top: 15px;"></center>';        
+  }
+  return chartData;
+}
+
+/*
+ *  This method creates a stacked chart for available Seagrass data
+ *  Uses the AmCharts JS library
+ */
+function loadSeagrassData(id, data, component){
+  var chartData   = [];
+
+  // component identifies which <DIV> component holds the stacked graph
+  for(i = 0; i < data.length ; i++){
+
+    // NIPAS site specific
+    if(data[i].loc_id == id){
+        chartData = [{
+            "species"  : "Enhalus acoroides",
+            "count"    : data[i].E_acor,
+            "year"     : data[i].survey_date,
+            "color"    : "#FF0F00"
+        },{
+            "species"  : "Thalassia hemprichii",
+            "count"    : data[i].T_hem,
+            "year"     : data[i].survey_date,
+            "color"    : "#FF6600"
+        },{
+            "species"  : "Cymodocea serrulata",
+            "count"    : data[i].C_ser,
+            "year"     : data[i].survey_date,
+            "color"    : "#FF9E01"
+        },{
+            "species"  : "Cymodocea rotundata",
+            "count"    : data[i].C_rot,
+            "year"     : data[i].survey_date,
+            "color"    : "#FCD202"
+        },{
+            "species"  : "Halodule uninervis",
+            "count"    : data[i].H_uni,
+            "year"     : data[i].survey_date,
+            "color"    : "#F8FF01"
+        },{
+            "species"  : "Halodule pinifolia",
+            "count"    : data[i].H_pini,
+            "year"     : data[i].survey_date,
+            "color"    : "#B0DE09"
+        },{
+            "species"  : "Halodule minor",
+            "count"    : data[i].H_min,
+            "year"     : data[i].survey_date,
+            "color"    : "#04D215"
+        },{
+            "species"  : "Halodule decipiens",
+            "count"    : data[i].H_deci,
+            "year"     : data[i].survey_date,
+            "color"    : "#0D8ECF"
+        },{
+            "species"  : "Halodule ovalis",
+            "count"    : data[i].H_ova,
+            "year"     : data[i].survey_date,
+            "color"    : "#0D52D1"
+        },{
+            "species"  : "Halodule spinulosa",
+            "count"    : data[i].H_spi,
+            "year"     : data[i].survey_date,
+            "color"    : "#2A0CD0"
+        },{
+            "species"  : "Syringodium isoetifolium",
+            "count"    : data[i].S_iso,
+            "year"     : data[i].survey_date,
+            "color"    : "#8A0CCF"
+        }
+        ]; 
+      };
+    }
+  
+
+  if( chartData.length == 0){ document.getElementById('pills-seagrass').innerHTML = '<center><img src="files/err/no_data.png" width="100%" style="margin-top: 15px;"></center>'; return; }
+
+  /* Start creating the stacked chart */
+  var chart = AmCharts.makeChart( component , {
+        "type": "serial",
+        "theme": "light",
+        "dataProvider" : chartData,
+        "titles": [{
+            "text": "Seagrass Density"
+        }, {
+            "text": chartData[0].year,
+            "bold": false
+        }],
+        "valueAxes": [ {
+            "gridColor": "#FFFFFF",
+            "gridAlpha": 0.2,
+            "dashLength": 0
+        }],
+        "gridAboveGraphs": true,
+        "startDuration": 1,
+          "graphs": [ {
+                "balloonText": "[[category]]: <b>[[value]]</b> shoots per m2",
+                "fillAlphas": 0.8,
+                "fillColorsField": "color",
+                "lineAlpha": 0.2,
+                "type": "column",
+                "valueField": "count"
+           }],
+           "chartCursor": {
+                "categoryBalloonEnabled": false,
+                "cursorAlpha": 0,
+                "zoomable": false
+            },
+            "categoryField": "species",
+            "categoryAxis": {
+                "gridPosition": "start",
+                "labelRotation": 45
+            },
+            "export": {
+                // Export options
+                "enabled": true,
+                "beforeCapture": function(menuConfig) {
+          //var url = "http:\\\\localhost\\training\\DENR.png"; 
+          var url = "images/logo/agoscorva.png"; 
+          var setup = this.setup;
+            var timer = setInterval(function() {
+              if (setup.fabric) {
+                var canvas = setup.fabric;
+                clearTimeout(timer);
+                canvas.setOverlayImage(url, canvas.renderAll.bind(canvas),{
+                  scaleX: 0.6,
+                  scaleY: 0.6,
+                  originX: 'left',
+                  originY: 'top'
+                });
+              }
+            }, 100);
+          }
+            },
+            "allLabels": [
+                // Initialize X and Y axis labels
+                {"x": 2, "y": 300, "text": "shoots per m2", "align": "left", "size": 14, "color": "#000000", "rotation": 270, "bold": true}
+            ]
+
+  });
+
+  return chartData;
+}
+
+/*
+ *  Load available ARRAS data from an external JSON file
+ *  Error image if no data is found
+ */
+function loadArrasData( id ){
+  arrasData.forEach(  function(data){
+    if( data.loc_id == id){
+      return data.remarks;
+    }
+  });
+
+  return '';
+  // return '<center><img src="files/err/no_data.png" width="100%" style="margin-top: 15px;"></center>';
+}
+
+function loadCoastalData( id, data ){
+  for(i = 0, j = 0; i < data.length ; i++){
+    if(data[i].loc_id == id){
+      document.getElementById('pills-coastal').innerHTML = '<br><div class="row"><div class="col-lg-12 col-md-12"><p style="font-size: 1.4em;">'+ 
+            data[i].survey_remarks +' Current state of the shore was evaluated using <a href="#" onClick="viewMethodDescription(\'coastal-link\')">on-site beach monitoring technique</a>.</p><br/><div style="font-size: 1.4em;"><strong>Survey Date:</strong> '+ data[i].survey_date + '<br/><strong>Lenght of shoreline surveyed:</strong> '+ data[i].survey_length + ' km.<br/><strong>Site:</strong> ' + data[i].monitoring_site + 
+            '</div><br/><img class="project_images rounded mx-auto d-block" src=\"files/coastal/'+ data[i].loc_id +'.png\" onerror=\"onError(this);\" width=\"100%\"\'></div></div>';
+      return;
+    }
+  }
+  document.getElementById('pills-coastal').innerHTML = '<center><img src="files/err/no_data.png" width="100%" style="margin-top: 15px;"></center>'; 
+  return; 
+}
+
+/*
+ *  Open a specific tab in the project components panel
+ */
+function viewMethodDescription( _componentLink ){
+  sidebar.open('projects');
+  document.getElementById( _componentLink ).click();
+}
+/* End of script.js */
+
+//*******************************************************************************************************************************************
+
+//start of joes2.js
+
+
+//UpdateYear();
+//Index=MyYears.length - 1;
+//document.getElementById("tex").innerHTML = MyYears[Index];
+//UpdateData();
+
+
+function Dec(){
+  --Index;
+  if(Index < 0){
+    Index = MyYears.length - 1;
+    //Index = 0;
+  }
+  //document.getElementById("test").innerHTML = MyYears[Index];
+  //document.getElementById("test").innerHTML = Index;
+  UpdateData();
+}
+
+ function Inc(){
+   ++Index;
+   if(Index > (MyYears.length-1)){
+     Index = 0
+     //Index = MyYears.length - 1;
+   }
+   //document.getElementById("test").innerHTML = MyYears[Index];
+   //document.getElementById("test").innerHTML = Index;
+   UpdateData();
+
+ }
+
+ function UpdateYear(){
+   $.ajax({
+     type: 'POST',
+     url: 'http://202.92.131.252/cgi-bin/MangroveYear.pl',
+     //url: 'http://localhost/cgi-bin/MangroveYear.pl',
+     //url: 'cgi-bin/MangroveYear.pl',
+     async: false,
+     data: {
+       //"loc_id": 33 
+       "loc_id": ManLocId 
+     },
+     success: function(res){
+       MyYears=res;
+       // This has data...
+       //document.getElementById("tex").innerHTML= "<h1>MyYears</h1>";
+       //document.getElementById("tex").innerHTML = res[0];
+       //return  res;
+       //show();
+       //return MyYears;
+     },
+     error: function(){
+       alert("UpdateYear Did not work!");
+     }
+   });
+ }
+
+
+ function UpdateData(){
+   $.ajax({
+     type: 'POST',
+     url: 'http://202.92.131.252/cgi-bin/MangroveData.pl',
+     //url: 'http://localhost/cgi-bin/MangroveData.pl',
+     //url: 'cgi-bin/MangroveData.pl',
+     async: false,
+     data: {
+       "loc_id": ManLocId, 
+       "year": MyYears[Index]
+     },
+     success: function(res){
+       myData=res;
+       // This has data...
+       //document.getElementById("tex").innerHTML= myData;
+       if(MyYears.length <= 1){
+         document.getElementById("mybuttons").innerHTML= "";
+         //document.getElementById("SurveyDate").innerHTML= "None on Record.";
+       }
+         if(MyYears.length <= 0){
+           document.getElementById("SurveyDate").innerHTML= "None on Record.";
+         }
+         else{
+           show();
+         }
+     },
+     error: function(){
+       alert("UpdateData Did not work!");
+     }
+   });
+ }
+
+
+ function show(){
+   document.getElementById("SurveyDate").innerHTML= MyYears[Index];
+   var chart = AmCharts.makeChart( "mangrove-data-stem", {
+     "type": "xy",
+     "theme": "light",
+     "legend": {
+     //"divId": "MyLegend",
+     "equalWidths": false,
+     "periodValueText": "total: [[value.sum]]",
+     "position": "right",
+     "valueAlign": "left",
+     "valueWidth": 100
+       },
+     "legend": {
+       fontSize: 10
+     },
+     "dataProvider": myData,
+     "balloon":{
+      "fixedPosition":true,
+     },
+     "valueAxes": [ {
+     "position": "bottom",
+     //"axisAlpha": 0
+     "axisAlpha": 0
+     }, {
+     "minMaxMultiplier": 1,
+     "axisAlpha": 0,
+     "position": "left"
+     } ],
+     //"startDuration": 1.5,
+     "startDuration": 0.1,
+     "graphs": [ 
+     {
+     "title": "Avicennia marina",
+     //"lineColor": "HotPink",
+     "balloonText": "<i>[[title]]</i><br/>Total Height: <b>[[y]]</b><br/>Stem Density: <b>[[x]]</b><br>Basal Area: <b>[[value]]</b>",
+     "bullet": "circle",
+     "bulletBorderAlpha": 0.2,
+     "bulletAlpha": 0.8,
+     "lineAlpha": 0,
+     "fillAlphas": 0,
+     "xField": "Amars",     //x - Stem Density
+     "yField": "Amarc",     //y - Canopy Cover change to "Total Height"
+     "valueField": "Amarb", //value - Basal Area
+     "maxBulletSize": 100
+     }, 
+    
+     {
+     "title": "Avicennia rumphiana",
+     //"lineColor": "MediumVioletRed",
+     "balloonText": "<i>Avicennia rumphiana</i><br/>Total Height: <b>[[y]]</b><br/>Stem Density: <b>[[x]]</b><br>Basal Area: <b>[[value]]</b>",
+     "bullet": "circle",
+     "bulletBorderAlpha": 0.2,
+     "bulletAlpha": 0.8,
+     "lineAlpha": 0,
+     "fillAlphas": 0,
+     "xField": "Arums",
+     "yField": "Arumc",
+     "valueField": "Arumb",
+     "maxBulletSize": 100
+     }, 
+    
+     {
+     "title": "Bruguiera sexangula",
+     //"lineColor": "IndianRed",
+     "balloonText": "<i>Bruguiera sexangula</i><br/>Total Height: <b>[[y]]</b><br/>Stem Density: <b>[[x]]</b><br>Basal Area: <b>[[value]]</b>",
+     "bullet": "circle",
+     "bulletBorderAlpha": 0.2,
+     "bulletAlpha": 0.8,
+     "lineAlpha": 0,
+     "fillAlphas": 0,
+      "xField": "Bsexs",
+     "yField": "Bsexc",
+     "valueField": "Bsexb",
+     "maxBulletSize": 100
+     }, 
+    
+     {
+     "title": "Ceriops decandra",
+     //"lineColor": "LightSalmon",
+     "balloonText": "<i>Ceriops decandra</i><br/>Total Height: <b>[[y]]</b><br/>Stem Density: <b>[[x]]</b><br>Basal Area: <b>[[value]]</b>",
+     "bullet": "circle",
+     "bulletBorderAlpha": 0.2,
+     "bulletAlpha": 0.8,
+     "lineAlpha": 0,
+     "fillAlphas": 0,
+     "xField": "Cdecs",
+     "yField": "Cdecc",
+     "valueField": "Cdecb",
+     "maxBulletSize": 100
+     }, 
+    
+     {
+     "title": "Lumnitzera littorea",
+     //"lineColor": "Orange",
+     "balloonText": "<i>Lumnitzera littorea</i><br/>Total Height: <b>[[y]]</b><br/>Stem Density: <b>[[x]]</b><br>Basal Area: <b>[[value]]</b>",
+     "bullet": "circle",
+     "bulletBorderAlpha": 0.2,
+     "bulletAlpha": 0.8,
+     "lineAlpha": 0,
+     "fillAlphas": 0,
+     "xField": "Llits",
+     "yField": "Llitc",
+     "valueField": "Llitb",
+     "maxBulletSize": 100
+     }, 
+    
+     {
+     "title": "Nypa fruticans",
+     //"lineColor": "OrangeRed",
+     "balloonText": "<i>Nypa fruticans</i><br/>Total Height: <b>[[y]]</b><br/>Stem Density: <b>[[x]]</b><br>Basal Area: <b>[[value]]</b>",
+     "bullet": "circle",
+     "bulletBorderAlpha": 0.2,
+     "bulletAlpha": 0.8,
+     "lineAlpha": 0,
+     "fillAlphas": 0,
+     "xField": "Nfrus",
+     "yField": "Nfruc",
+     "valueField": "Nfrub",
+     "maxBulletSize": 100
+     }, 
+    
+     {
+     "title": "Rhizophora apiculata",
+     //"lineColor": "Gold",
+     "balloonText": "<i>Rhizophora apiculata</i><br/>Total Height: <b>[[y]]</b><br/>Stem Density: <b>[[x]]</b><br>Basal Area: <b>[[value]]</b>",
+     "bullet": "circle",
+     "bulletBorderAlpha": 0.2,
+     "bulletAlpha": 0.8,
+     "lineAlpha": 0,
+     "fillAlphas": 0,
+     "xField": "Rapis",
+     "yField": "Rapic",
+     "valueField": "Rapib",
+     "maxBulletSize": 100
+     }, 
+    
+     {
+     "title": "Rhizophora mucronata",
+     //"lineColor": "GoldenRod",
+     "balloonText": "<i>Rhizophora mucronata</i><br/>Total Height: <b>[[y]]</b><br/>Stem Density: <b>[[x]]</b><br>Basal Area: <b>[[value]]</b>",
+     "bullet": "circle",
+     "bulletBorderAlpha": 0.2,
+     "bulletAlpha": 0.8,
+     "lineAlpha": 0,
+     "fillAlphas": 0,
+     "xField": "Rmucs",
+     "yField": "Rmucc",
+     "valueField": "Rmucb",
+     "maxBulletSize": 100
+     }, 
+    
+     {
+     "title": "Rhizophora stylosa",
+     //"lineColor": "Sienna",
+     "balloonText": "<i>Rhizophora stylosa</i><br/>Total Height: <b>[[y]]</b><br/>Stem Density: <b>[[x]]</b><br>Basal Area: <b>[[value]]</b>",
+     "bullet": "circle",
+     "bulletBorderAlpha": 0.2,
+     "bulletAlpha": 0.8,
+     "lineAlpha": 0,
+     "fillAlphas": 0,
+     "xField": "Rstys",
+     "yField": "Rstyc",
+     "valueField": "Rstyb",
+     "maxBulletSize": 100
+     }, 
+    
+     {
+     "title": "Sonneratia alba",
+     //"lineColor": "Green",
+     "balloonText": "<i>Sonneratia alba</i><br/>Total Height: <b>[[y]]</b><br/>Stem Density: <b>[[x]]</b><br>Basal Area: <b>[[value]]</b>",
+     "bullet": "circle",
+     "bulletBorderAlpha": 0.2,
+     "bulletAlpha": 0.8,
+     "lineAlpha": 0,
+     "fillAlphas": 0,
+     "xField": "Salbs",
+     "yField": "Salbc",
+     "valueField": "Salbb",
+     "maxBulletSize": 100
+     }, 
+    
+     {
+     "title": "Xylocarpus granatum",
+     //"lineColor": "Olive",
+     "balloonText": "<i>Xylocarpus granatum</i><br/>Total Height: <b>[[y]]</b><br/>Stem Density: <b>[[x]]</b><br>Basal Area: <b>[[value]]</b>",
+     "bullet": "circle",
+     "bulletBorderAlpha": 0.2,
+     "bulletAlpha": 0.8,
+     "lineAlpha": 0,
+     "fillAlphas": 0,
+     "xField": "Xgras",
+     "yField": "Xgrac",
+     "valueField": "Xgrab",
+     "maxBulletSize": 100
+     }, 
+    
+     {
+     "title": "Other species",
+     //"lineColor": "Teal",
+     "balloonText": "<i>Other species</i><br/>Total Height: <b>[[y]]</b><br/>Stem Density: <b>[[x]]</b><br>Basal Area: <b>[[value]]</b>",
+     "bullet": "circle",
+     "bulletBorderAlpha": 0.2,
+     "bulletAlpha": 0.8,
+     "lineAlpha": 0,
+     "fillAlphas": 0,
+     "xField": "Ospes",
+     "yField": "Ospec",
+     "valueField": "Ospeb",
+     "maxBulletSize": 100
+     }, 
+  
+     ],
+     "valueAxes":[{
+       "position": "left",
+       "title": "Total Height (Canopy Cover)"
+     },{
+       "position": "bottom",
+       "title": "Stem Density\n\n( Note: Circle size is equal to the Basal Area. )"
+     }],
+     "marginLeft": 46,
+     "marginBottom": 35,
+     "export": {
+     "enabled": true,
+     "beforeCapture": function(menuConfig) {
+           //var url = "http:\\\\localhost\\training\\DENR.png"; 
+           var url = "images/logo/agoscorva.png"; 
+       var setup = this.setup;
+           var timer = setInterval(function() {
+         if (setup.fabric) {
+           var canvas = setup.fabric;
+           clearTimeout(timer);
+           canvas.setOverlayImage(url, canvas.renderAll.bind(canvas), {
+             scaleX: 0.6,
+             scaleY: 0.6,
+             originX: 'left',
+             originY: 'top'
+           });
+         }
+           }, 100);
+       }
+     }
+   } );
+   return;
+ }
