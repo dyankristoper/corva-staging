@@ -416,23 +416,23 @@ function viewnipasInfo(id){
   nipasDataContent += '<div class="tab-pane" id="pills-shallow" role="tabpanel">' + 
   					  '<p style="font-size: 1.4em;text-align: justify;">Coral Survey uses a combined <a href="#" onClick="viewMethodDescription(\'shallow-reef-link\')">Reef Check and GEF-CRTR protocol</a>.</p>' +
   					  '<br/><div style="font-size: 200%;"><strong><center>Coral Data</center></strong></div>' +
-              '<br/><div id="jCoralData"style="font-size: 150%;"><p><b>Survey Date: </b><span id="SurveyDateCoralData" style="color: blue;"></span></p></div>  <div id=\'coral-data\' style="width: 700px; height: 500px;"></div>   <br/><div id = "mybuttonsCoralData" style="position: relative; left:40px; top: -20px;"> <button type="button" onclick="IncCoralData()">Prev</button> <button type="button" onclick="DecCoralData()">Next</button> </div> <br/><div id="coral-carousel"></div></div>';
+              '<br/><div id="jCoralData"style="font-size: 150%;"><p><b>Survey Date: </b><span id="SurveyDateCoralData" style="color: blue;"></span></p></div>  <div id=\'coral-data\' style="width: 100%; height: 500px;"></div>   <br/><div id = "mybuttonsCoralData" style="position: relative; left:40px; top: -20px;"> <button type="button" onclick="IncCoralData()">Prev</button> <button type="button" onclick="DecCoralData()">Next</button> </div> <br/><div id="coral-carousel"></div></div>';
   nipasDataContent += '<div class="tab-pane" id="pills-fish" role="tabpanel">' +
   					  '<p style="font-size: 1.4em;text-align: justify;">Reef fish communities were assessed using <a href="#" onClick="viewMethodDescription(\'reef-fish-link\')">fish visual census</a>.</p>' +
               '<br/><div style="font-size: 200%;"><strong><center>Species Count</center></strong></div>' +
   					  '<br/><div id="jFishSp" style="font-size: 150%;"><p><b>Survey Date: </b><span id="SurveyDateFishSp" style="color: blue;"></span></p></div> <div id=\'fish-data-sp\' style="width: 680px; height: 500px;"></div>  <br/><div id = "mybuttonsFishSp" style="position: relative; left:40px; top: -20px;"> <button type="button" onclick="IncFishSp()">Prev</button> <button type="button" onclick="DecFishSp()">Next</button> </div> <hr/>' +
               '<br/><div style="font-size: 200%;"><strong><center>Mean Abundance</center></strong></div>' +
-              '<br/><div id="jFishDen" style="font-size: 150%;"><p><b>Survey Date: </b><span id="SurveyDateFishDen" style="color: blue;"></span></p></div> <div id=\'fish-data-den\' style="width: 680px; height: 500px;"></div><br/>   <br/><div id = "mybuttonsFishDen" style="position: relative; left:40px; top: -20px;"> <button type="button" onclick="IncFishDen()">Prev</button> <button type="button" onclick="DecFishDen()">Next</button> </div>  <hr/>' +
+              '<br/><div id="jFishDen" style="font-size: 150%;"><p><b>Survey Date: </b><span id="SurveyDateFishDen" style="color: blue;"></span></p></div> <div id=\'fish-data-den\' style="width: 100%; height: 500px;"></div><br/>   <br/><div id = "mybuttonsFishDen" style="position: relative; left:40px; top: -20px;"> <button type="button" onclick="IncFishDen()">Prev</button> <button type="button" onclick="DecFishDen()">Next</button> </div>  <hr/>' +
               '<br/><div style="font-size: 200%;"><strong><center>Mean Biomass</center></strong></div>' +
-              '<br/><div id="jFishBio" style="font-size: 150%;"><p><b>Survey Date: </b><span id="SurveyDateFishBio" style="color: blue;"></span></p></div> <div id=\'fish-data-bio\' style="width: 680px; height: 500px;"></div>   <br/><div id = "mybuttonsFishBio" style="position: relative; left:40px; top: -20px;"> <button type="button" onclick="IncFishBio()">Prev</button> <button type="button" onclick="DecFishBio()">Next</button> </div>  </div>';
+              '<br/><div id="jFishBio" style="font-size: 150%;"><p><b>Survey Date: </b><span id="SurveyDateFishBio" style="color: blue;"></span></p></div> <div id=\'fish-data-bio\' style="width: 100%; height: 500px;"></div>   <br/><div id = "mybuttonsFishBio" style="position: relative; left:40px; top: -20px;"> <button type="button" onclick="IncFishBio()">Prev</button> <button type="button" onclick="DecFishBio()">Next</button> </div>  </div>';
   nipasDataContent += '<div class="tab-pane" id="pills-coastal" role="tabpanel"></div>';
   nipasDataContent += '<div class="tab-pane" id="pills-connectivity" role="tabpanel"><br><div class="row"><div class="col-lg-12 col-md-12">' + 
   					  '<p style="font-size: 1.4em;text-align: justify;">To know the extent to which population of marine organisms are linked, we used the HYCOM model to <a href="#" onClick="viewMethodDescription(\'connectivity-link\')">simulate dispersal pattern </a>for coral larvae.</p>' + 
-  					  '<img src=\'files/connectivity/'+ nipasMarkers[id].locID +'.gif\' width="100%"><br/><br/><div id="connectivity-carousel"></div>' + '</div></div></div>';
+  					  '<img src=\'files/connectivity/'+ nipasMarkers[id].locID +'.gif\' onerror=\"onError(this);\" width="100%"><br/><br/><div id="connectivity-carousel"></div>' + '</div></div></div>';
   nipasDataContent += '<div class="tab-pane" id="pills-mangrove" role="tabpanel">' + 
                       '<p style="font-size: 1.4em;text-align: justify;">Mangroves were assessed using <a href="#" onClick="viewMethodDescription(\'mangrove-link\')">this method</a>.</p>' +
                       '<br/><div style="font-size: 200%;"><strong><center>Mangrove Data</center></strong></div>' +
-                      '<br/><br/><div id="jmangrove"style="font-size: 150%;"><p><b>Survey Date: </b><span id="SurveyDate" style="color: blue;"></span></p></div><div id="mangrove-data" style="width: 680px; height:450px;"></div><br/> <div id = "mybuttons" style="position: relative; left:40px; top: -20px;"> <button type="button" onclick="Inc()">Prev</button> <button type="button" onclick="Dec()">Next</button></div><br/>' + 
+                      '<br/><br/><div id="jmangrove"style="font-size: 150%;"><p><b>Survey Date: </b><span id="SurveyDate" style="color: blue;"></span></p></div><div id="mangrove-data" style="width: 100%; height:450px;"></div><br/> <div id = "mybuttons" style="position: relative; left:40px; top: -20px;"> <button type="button" onclick="Inc()">Prev</button> <button type="button" onclick="Dec()">Next</button></div><br/>' + 
                       '<div id="mangrove-carousel"></div></div>';
   nipasDataContent += '<div class="tab-pane" id="pills-management" role="tabpanel">'+ 
   					  '<br/><div id="management_desc" style="font-size: 1.4em; text-align: justify;"></div><br/>' + 
@@ -443,7 +443,7 @@ function viewnipasInfo(id){
               '<div style="font-size: 150%;">' +
                 '<p><b>Survey Date: </b><span id="SurveyDateSeagrassCover" style="color: blue;"></span></p>' +
               '</div>' +
-              '<br/><div id=\'seagrass-pie\' style="width: 700px; height: 500px;"></div>' +
+              '<br/><div id=\'seagrass-pie\' style="width: 100%; height: 500px;"></div>' +
               '<br/><div id="mybuttonsSeagrassCover" style="position: relative; left:40px; top:-20px;">' +
                 '<button type="button" onclick="IncSeagrassCover()">Prev</button>' +
                 '<button type="button" onclick="DecSeagrassCover()">Next</button>' +
@@ -452,7 +452,7 @@ function viewnipasInfo(id){
               '<br/><div id="jSeagrass" style="font-size: 150%;">' +
                 '<p><b>Survey Date: </b><span id="SurveyDateSeagrass" style="color: blue;"></span></p>' +
               '</div>' +
-              '<br/><div id="seagrass-data" style="width: 680px; height:520px;"></div>' +
+              '<br/><div id="seagrass-data" style="width: 100%; height:520px;"></div>' +
               '<br/><div id = "mybuttonsSeagrass" style="position: relative; left:40px; top: -20px;">' + 
                 '<button type="button" onclick="IncSeagrass()">Prev</button>' +
                 '<button type="button" onclick="DecSeagrass()">Next</button>' +
@@ -461,7 +461,7 @@ function viewnipasInfo(id){
   nipasDataContent += '<div class="tab-pane" id="pills-deep" role="tabpanel">' + 
   					  '<div id="deep-desc"></div><br/>' +
               '<br/><div style="font-size: 200%;"><strong><center>Substrate Composition</center></strong></div>' +
-              '<br/><div id="jDeepCoral" style="font-size: 150%;"><p><b>Survey Date: </b><span id="SurveyDateDeepCoral" style="color: blue;"></span></p></div> <div id="deep-data" style="width: 700px; height: 500px;"><br/></div>  <br/><div id = "mybuttonsDeepCoral" style="position: relative; left:40px; top: -20px;"> <button type="button" onclick="IncDeepCoral()">Prev</button> <button type="button" onclick="DecDeepCoral()">Next</button> </div>  </div>';
+              '<br/><div id="jDeepCoral" style="font-size: 150%;"><p><b>Survey Date: </b><span id="SurveyDateDeepCoral" style="color: blue;"></span></p></div> <div id="deep-data" style="width: 100%; height: 500px;"><br/></div>  <br/><div id = "mybuttonsDeepCoral" style="position: relative; left:40px; top: -20px;"> <button type="button" onclick="IncDeepCoral()">Prev</button> <button type="button" onclick="DecDeepCoral()">Next</button> </div>  </div>';
   nipasDataContent += '</div>';
   //nipasDataContent += '</div>';	// There is one missing closing </div>.
   nipasData.innerHTML = nipasDataContent;
