@@ -13,7 +13,7 @@
 	 *	LIVE configration
 	 */
 	
-	$host_name 	= "http://202.90.159.38";
+	$host_name 	= "202.90.159.38";
 	$database 	= "corva"; 	// Database Name
 	$username 	= "root"; 			// Database user id
 	$password 	= "admin"; 		// Password
