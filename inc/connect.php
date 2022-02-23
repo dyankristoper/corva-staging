@@ -13,12 +13,10 @@
 	 *	LIVE configration
 	 */
 	
-	$host_name 	= "localhost";
-	//$host_name 	= "202.92.131.252";
-	$database 	= "corvatraining"; 	// Database Name
-	$username 	= "jca"; 			// Database user id
-	//$username 	= "root"; 			// Database user id 
-	$password 	= "ms1jc1"; 		// Password
+	$host_name 	= "http://202.90.159.38";
+	$database 	= "corva"; 	// Database Name
+	$username 	= "root"; 			// Database user id
+	$password 	= "admin"; 		// Password
 	//$password 	= ""; 		// Password
 
 	//////// DO NOT EDIT BELOW /////////
