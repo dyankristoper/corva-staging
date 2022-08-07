@@ -69,6 +69,7 @@ var nipasMarkers = (function(){
     async: false,
     dataType: 'json',
     success: function(response){
+      console.table( response );
       nipasMarkers = response;
     }
   });
