@@ -1451,7 +1451,7 @@ function UpdateDataCoralData(){
   $.ajax({
    	// type: 'POST',
     type: 'GET',
-   	url: `http://202.90.159.38:8000/api/v1/shallow-coral/${ManLocIdCoralData}`,
+   	url: `http://localhost:8000/api/v1/shallow-coral/${ManLocIdCoralData}`,
  	 	async: false,
    	// data: {
    	// 	"loc_id": ManLocIdCoralData, 
