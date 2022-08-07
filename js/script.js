@@ -585,9 +585,9 @@ function onError(image){
  */
 function loadCoralData(id){
 
-	IndexCoralData=0;
-  ManLocIdCoralData=id;
-  UpdateYearCoralData();
+	IndexCoralData = 0;
+  ManLocIdCoralData = id;
+  // UpdateYearCoralData();
 	UpdateDataCoralData();
 }
 
@@ -1448,14 +1448,16 @@ function UpdateYearCoralData(){
 
 function UpdateDataCoralData(){
   $.ajax({
-   	type: 'POST',
-   	url: '/cgi-bin/CoralDataData.pl',
+   	// type: 'POST',
+    type: 'GET',
+   	url: `localhost:8000/api/v1/shallow-coral/${loc_id}`,
  	 	async: false,
-   	data: {
-   		"loc_id": ManLocIdCoralData, 
-   		"year": MyYearsCoralData[IndexCoralData]
-   	},
+   	// data: {
+   	// 	"loc_id": ManLocIdCoralData, 
+   	// 	"year": MyYearsCoralData[IndexCoralData]
+   	// },
    	success: function(res){
+      console.log(res);
      	myDataCoralData=res;
    		if(MyYearsCoralData[0] == -9999){
      		document.getElementById("mybuttonsCoralData").innerHTML="";
