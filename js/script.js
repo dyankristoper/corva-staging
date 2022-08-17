@@ -1439,7 +1439,10 @@ function UpdateYearCoralData(){
    	async: false,
    	data: {},
    	success: function(res){
-     		MyYearsCoralData=res;
+      res.map( data => {
+        MyYearsCoralData.push(data.monitor_year);
+      });
+      console.log( MyYearsCoralData );
    	},
    	error: function(ts){
      		alert("UpdateYear CoralData Did not work!");
