@@ -1435,11 +1435,9 @@ function IncCoralData(){
 function UpdateYearCoralData(){
   $.ajax({
    	type: 'POST',
-   	url: '/cgi-bin/CoralDataYear.pl',
+   	url: `${API_ENDPOINT}/v1/shallow-coral/${ManLocIdCoralData}/year`,
    	async: false,
-   	data: {
-     		"loc_id": 	ManLocIdCoralData 
-   	},
+   	data: {},
    	success: function(res){
      		MyYearsCoralData=res;
    	},
@@ -1454,7 +1452,7 @@ function UpdateDataCoralData(){
   $.ajax({
    	// type: 'POST',
     type: 'GET',
-   	url: `${API_ENDPOINT}/api/v1/shallow-coral/${ManLocIdCoralData}`,
+   	url: `${API_ENDPOINT}/v1/shallow-coral/${ManLocIdCoralData}/${MyYearsCoralData[IndexCoralData]}`,
  	 	async: false,
    	// data: {
    	// 	"loc_id": ManLocIdCoralData, 
