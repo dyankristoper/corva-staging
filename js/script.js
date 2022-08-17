@@ -1435,14 +1435,14 @@ function UpdateYearCoralData(){
   $.ajax({
    	type: 'GET',
    	url: `${API_ENDPOINT}/v1/shallow-coral/${ManLocIdCoralData}/year`,
-   	async: true,
+   	async: false,
    	data: {},
    	success: function(res){
       res.map( data => {
         MyYearsCoralData.push(data.monitor_year);
       });
       console.log(MyYearsCoralData);
-      console.log('Updatign coral data');
+      console.log('Updating coral data');
       UpdateDataCoralData();
    	},
    	error: function(ts){
@@ -1457,7 +1457,7 @@ function UpdateDataCoralData(){
    	// type: 'POST',
     type: 'GET',
    	url: `${API_ENDPOINT}/v1/shallow-coral/${ManLocIdCoralData}/${MyYearsCoralData[IndexCoralData]}`,
- 	 	async: true,
+ 	 	async: false,
    	// data: {
    	// 	"loc_id": ManLocIdCoralData, 
    	// 	"year": MyYearsCoralData[IndexCoralData]
