@@ -588,11 +588,10 @@ function onError(image){
  *  Create a pie chart for existing coral data on each NIPAS site
  */
 function loadCoralData(id){
-
+  console.log(`Load coral data`);
 	IndexCoralData = 0;
   ManLocIdCoralData = id;
   UpdateYearCoralData();
-	UpdateDataCoralData();
 }
 
 /*
@@ -1442,7 +1441,9 @@ function UpdateYearCoralData(){
       res.map( data => {
         MyYearsCoralData.push(data.monitor_year);
       });
-      console.log( MyYearsCoralData );
+      console.log(MyYearsCoralData);
+      console.log('Updatign coral data');
+      UpdateDataCoralData();
    	},
    	error: function(ts){
      		alert("UpdateYear CoralData Did not work!");
