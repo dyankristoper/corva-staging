@@ -1,5 +1,8 @@
 /* JQuery */
 
+// Constant variables
+const API_ENDPOINT = 'http://202.90.159.38/api';
+
 //Mangroves
 var myData;
 var MyYears;
@@ -1451,7 +1454,7 @@ function UpdateDataCoralData(){
   $.ajax({
    	// type: 'POST',
     type: 'GET',
-   	url: `http://localhost:8000/api/v1/shallow-coral/${ManLocIdCoralData}`,
+   	url: `${API_ENDPOINT}/api/v1/shallow-coral/${ManLocIdCoralData}`,
  	 	async: false,
    	// data: {
    	// 	"loc_id": ManLocIdCoralData, 
