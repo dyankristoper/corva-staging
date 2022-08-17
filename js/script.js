@@ -11,7 +11,7 @@ var ManLocId;
 
 //Coral Data
 var myDataCoralData;
-var MyYearsCoralData;
+var MyYearsCoralData = [];
 var IndexCoralData=0;
 var ManLocIdCoralData;
 
