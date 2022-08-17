@@ -591,7 +591,7 @@ function loadCoralData(id){
 
 	IndexCoralData = 0;
   ManLocIdCoralData = id;
-  // UpdateYearCoralData();
+  UpdateYearCoralData();
 	UpdateDataCoralData();
 }
 
