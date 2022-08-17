@@ -1434,7 +1434,7 @@ function IncCoralData(){
 
 function UpdateYearCoralData(){
   $.ajax({
-   	type: 'POST',
+   	type: 'GET',
    	url: `${API_ENDPOINT}/v1/shallow-coral/${ManLocIdCoralData}/year`,
    	async: false,
    	data: {},
