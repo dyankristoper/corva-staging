@@ -1436,7 +1436,7 @@ function UpdateYearCoralData(){
   $.ajax({
    	type: 'GET',
    	url: `${API_ENDPOINT}/v1/shallow-coral/${ManLocIdCoralData}/year`,
-   	async: false,
+   	async: true,
    	data: {},
    	success: function(res){
       res.map( data => {
@@ -1456,14 +1456,14 @@ function UpdateDataCoralData(){
    	// type: 'POST',
     type: 'GET',
    	url: `${API_ENDPOINT}/v1/shallow-coral/${ManLocIdCoralData}/${MyYearsCoralData[IndexCoralData]}`,
- 	 	async: false,
+ 	 	async: true,
    	// data: {
    	// 	"loc_id": ManLocIdCoralData, 
    	// 	"year": MyYearsCoralData[IndexCoralData]
    	// },
    	success: function(res){
       console.log(res);
-     	myDataCoralData=res;
+     	myDataCoralData = res;
    		if(MyYearsCoralData[0] == -9999){
      		document.getElementById("mybuttonsCoralData").innerHTML="";
      		document.getElementById("SurveyDateCoralData").innerHTML= "None on Record.";
